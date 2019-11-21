@@ -1,5 +1,7 @@
 <?php
 
+namespace Juuin\HttpClient\Facades;
+
 use Illuminate\Support\Facades\Facade;
 
 class HttpClient extends Facade
@@ -11,6 +13,6 @@ class HttpClient extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'httpclient';
+        return 'HttpClient';
     }
 }
