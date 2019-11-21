@@ -98,6 +98,6 @@ class HttpClient implements Configurable, Request, Response
      */
     public function response()
     {
-        return $this->response();
+        return $this->response;
     }
 }
