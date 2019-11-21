@@ -1,10 +1,12 @@
 {
     "name": "juuin/laravel-httpclient",
-    "description": "Facade HttpClient in Laravel",
+    "description": "HttpClient Facade in Laravel",
     "license": "MIT",
     "keywords": [
+        "php",
         "laravel",
-        "php"
+        "HttpClient",
+        "curl"
     ],
     "authors": [
         {
