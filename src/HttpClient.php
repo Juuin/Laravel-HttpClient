@@ -5,12 +5,15 @@ namespace Juuin\HttpClient;
 use Juuin\HttpClient\Contracts\Request;
 use Juuin\HttpClient\Contracts\Response;
 use Juuin\HttpClient\Contracts\Configurable;
+use Juuin\HttpClient\Exceptions\UrlNotSetException;
+use Juuin\HttpClient\Exceptions\WrongMethodException;
 
 class HttpClient implements Configurable, Request, Response
 {
-    private $curl;
+    private $url, $method, $headers, $params;
 
-    private $url, $response;
+    /** @var $response HttpClientResponse */
+    private $response;
 
     /**
      * Set the url of the request
@@ -20,13 +23,7 @@ class HttpClient implements Configurable, Request, Response
      */
     public function setUrl($url)
     {
-        $this->curl = curl_init();
-
         $this->url = $url;
-
-        curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
-
-        curl_setopt($this->curl, CURLOPT_URL, $this->url);
 
         return $this;
     }
@@ -39,9 +36,13 @@ class HttpClient implements Configurable, Request, Response
      */
     public function setMethod($method = 'GET')
     {
-        if ($method == 'POST') {
-            curl_setopt($this->curl, CURLOPT_POST, true);
+        $method = strtoupper($method);
+
+        if (!in_array($method, ['POST', 'GET'])) {
+            throw new WrongMethodException('Method should be GET or POST');
         }
+
+        $this->method = $method;
 
         return $this;
     }
@@ -54,7 +55,15 @@ class HttpClient implements Configurable, Request, Response
      */
     public function setHeaders(array $headers)
     {
-        curl_setopt($this->curl, CURLOPT_HTTPHEADER, $headers);
+        if (array_keys($headers) !== range(0, count($headers) - 1)) {
+            $temp = [];
+            foreach ($headers as $key => $value) {
+                array_push($temp, "$key: $value;");
+            }
+            $headers = $temp;
+        }
+
+        $this->headers = $headers;
 
         return $this;
     }
@@ -67,7 +76,7 @@ class HttpClient implements Configurable, Request, Response
      */
     public function setParams(array $params)
     {
-        curl_setopt($this->curl, CURLOPT_POSTFIELDS, $params);
+        $this->params = $params;
 
         return $this;
     }
@@ -75,18 +84,43 @@ class HttpClient implements Configurable, Request, Response
     /**
      * Set the configs of the request and send
      *
-     * @param array $configs
      * @return HttpClient
      */
-    public function send($configs = [])
+    public function send()
     {
-        $info = curl_getinfo($this->curl);
-        $error = curl_error($this->curl);
-        $response = curl_exec($this->curl);
+        $curl = curl_init();
 
-        $this->response = new HttpClientResponse($info, $response, $error);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-        curl_close($this->curl);
+        if ($this->headers) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $this->headers);
+        }
+
+        if ($this->method == 'POST') {
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $this->params);
+        } else {
+            $this->method = 'GET';
+        }
+
+        if ($this->method == 'GET') {
+            $this->url .= (!is_null($this->params) ? '?' . http_build_query($this->params) : '');
+        }
+
+        if (is_null($this->url)) {
+            throw new UrlNotSetException('Please set url before sending requests');
+        }
+
+        curl_setopt($curl, CURLOPT_URL, $this->url);
+        curl_setopt($curl, CURLOPT_FAILONERROR, true);
+
+        $body = curl_exec($curl);
+        $info = curl_getinfo($curl);
+        $error = curl_error($curl);
+
+        curl_close($curl);
+
+        $this->response = new HttpClientResponse($info, $body, $error);
 
         return $this;
     }

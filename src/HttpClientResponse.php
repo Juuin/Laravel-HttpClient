@@ -6,43 +6,18 @@ use JsonSerializable;
 
 class HttpClientResponse implements JsonSerializable
 {
-    private $info, $response, $error;
+    private $info, $body, $error;
 
-    public function __construct($info, $response, $error = null)
+    public function __construct($info, $body, $error = null)
     {
         $this->info = $info;
-        $this->response = $response;
+        $this->body = $body;
         $this->error = $error;
-    }
-
-    public function getUrl()
-    {
-        return $this->info['url'];
-    }
-
-    public function getContent()
-    {
-        return $this->response;
-    }
-
-    public function getHttpCode()
-    {
-        return $this->info['http_code'];
-    }
-
-    public function getRemoteIp()
-    {
-        return $this->info['primary_ip'];
-    }
-
-    public function getLocalIp()
-    {
-        return $this->info['local_ip'];
     }
 
     public function hasError()
     {
-        return !is_null($this->error) && !empty($this->error);
+        return (!is_null($this->error) && !empty($this->error)) || $this->getHttpCode() != 200;
     }
 
     public function getError()
@@ -50,16 +25,34 @@ class HttpClientResponse implements JsonSerializable
         return $this->error;
     }
 
+    public function getBody()
+    {
+        if ($this->hasError()) {
+            return $this->getError();
+        }
+
+        return $this->body;
+    }
+
+    public function getHttpCode()
+    {
+        return $this->info['http_code'];
+    }
+
     public function toArray()
     {
-        return json_decode($this->response, true);
+        if ($this->hasError()) {
+            return ['error' => $this->getError()];
+        }
+
+        return json_decode($this->getBody(), true);
     }
 
     public function jsonSerialize()
     {
         return [
             'info' => $this->info,
-            'content' => $this->response,
+            'body' => $this->body,
             'error' => $this->error
         ];
     }
