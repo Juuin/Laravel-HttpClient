@@ -2,15 +2,21 @@
 
 namespace Juuin\HttpClient;
 
-use Juuin\HttpClient\Contracts\Request;
-use Juuin\HttpClient\Contracts\Response;
-use Juuin\HttpClient\Contracts\Configurable;
+use Illuminate\Http\Response;
 use Juuin\HttpClient\Exceptions\UrlNotSetException;
 use Juuin\HttpClient\Exceptions\WrongMethodException;
+use Juuin\HttpClient\Exceptions\ErrorResponseException;
+use Juuin\HttpClient\Contracts\Request as BaseRequest;
+use Juuin\HttpClient\Contracts\Response as BaseResponse;
+use Juuin\HttpClient\Contracts\Configurable as BaseConfigurable;
 
-class HttpClient implements Configurable, Request, Response
+class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
 {
+    use HttpClientDebug;
+
     private $url, $method, $headers, $params;
+
+    private $sslKey, $sslCert, $basicAuth;
 
     /** @var $response HttpClientResponse */
     private $response;
@@ -82,6 +88,44 @@ class HttpClient implements Configurable, Request, Response
     }
 
     /**
+     * Set the ssl key file path
+     *
+     * @param string $path
+     * @return HttpClient
+     */
+    public function setSslKey($path)
+    {
+        $this->sslKey = $path;
+
+        return $this;
+    }
+
+    /**
+     * Set the ssl cert file path
+     *
+     * @param string $path
+     * @return HttpClient
+     */
+    public function setSslCert($path)
+    {
+        $this->sslCert = $path;
+
+        return $this;
+    }
+
+    /**
+     * @param $username
+     * @param $password
+     * @return HttpClient
+     */
+    public function setBasicAuth($username, $password)
+    {
+        $this->basicAuth = $username . ':' . $password;
+
+        return $this;
+    }
+
+    /**
      * Set the configs of the request and send
      *
      * @return HttpClient
@@ -111,6 +155,19 @@ class HttpClient implements Configurable, Request, Response
             throw new UrlNotSetException('Please set url before sending requests');
         }
 
+        if (!is_null($this->sslKey)) {
+            curl_setopt($curl, CURLOPT_SSLKEY, $this->sslKey);
+        }
+
+        if (!is_null($this->sslCert)) {
+            curl_setopt($curl, CURLOPT_SSLCERT, $this->sslCert);
+        }
+
+        if (!is_null($this->basicAuth)) {
+            curl_setopt($curl, CURLOPT_USERPWD, $this->basicAuth);
+            curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        }
+
         curl_setopt($curl, CURLOPT_URL, $this->url);
         curl_setopt($curl, CURLOPT_FAILONERROR, true);
 
@@ -121,6 +178,10 @@ class HttpClient implements Configurable, Request, Response
         curl_close($curl);
 
         $this->response = new HttpClientResponse($info, $body, $error);
+
+        if ($this->response->hasError()){
+            throw new ErrorResponseException(new Response($this->response->getError(), $this->response->getHttpCode(), $this->response->getBody()));
+        }
 
         return $this;
     }

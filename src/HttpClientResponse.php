@@ -27,10 +27,6 @@ class HttpClientResponse implements JsonSerializable
 
     public function getBody()
     {
-        if ($this->hasError()) {
-            return $this->getError();
-        }
-
         return $this->body;
     }
 
@@ -41,10 +37,6 @@ class HttpClientResponse implements JsonSerializable
 
     public function toArray()
     {
-        if ($this->hasError()) {
-            return ['error' => $this->getError()];
-        }
-
         return json_decode($this->getBody(), true);
     }
 

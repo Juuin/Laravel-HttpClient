@@ -37,4 +37,27 @@ interface Configurable
      * @return HttpClient
      */
     public function setParams(array $params);
+
+    /**
+     * Set the ssl key file path
+     *
+     * @param string $path
+     * @return HttpClient
+     */
+    public function setSslKey($path);
+
+    /**
+     * Set the ssl cert file path
+     *
+     * @param string $path
+     * @return HttpClient
+     */
+    public function setSslCert($path);
+
+    /**
+     * @param $username
+     * @param $password
+     * @return HttpClient
+     */
+    public function setBasicAuth($username, $password);
 }
