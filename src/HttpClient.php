@@ -2,6 +2,7 @@
 
 namespace Juuin\HttpClient;
 
+use Illuminate\Support\Arr;
 use Juuin\HttpClient\Exceptions\UrlNotSetException;
 use Juuin\HttpClient\Exceptions\WrongMethodException;
 use Juuin\HttpClient\Contracts\Request as BaseRequest;
@@ -134,13 +135,10 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
 
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-        if ($this->headers) {
-            curl_setopt($curl, CURLOPT_HTTPHEADER, $this->headers);
-        }
-
         if ($this->method == 'POST') {
             curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, $this->params);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($this->params));
+            array_push($this->headers, 'Content-Type: application/json');
         } else {
             $this->method = 'GET';
         }
@@ -151,6 +149,10 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
 
         if (is_null($this->url)) {
             throw new UrlNotSetException('Please set url before sending requests');
+        }
+
+        if (!is_null($this->headers)) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $this->headers);
         }
 
         if (!is_null($this->sslKey)) {
@@ -167,7 +169,7 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
         }
 
         curl_setopt($curl, CURLOPT_URL, $this->url);
-        curl_setopt($curl, CURLOPT_FAILONERROR, true);
+//        curl_setopt($curl, CURLOPT_FAILONERROR, true);
 
         $body = curl_exec($curl);
         $info = curl_getinfo($curl);
