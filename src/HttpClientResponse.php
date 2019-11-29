@@ -25,6 +25,11 @@ class HttpClientResponse implements JsonSerializable
         return $this->error;
     }
 
+    public function getInfo()
+    {
+        return $this->info;
+    }
+
     public function getBody()
     {
         return $this->body;

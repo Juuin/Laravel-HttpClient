@@ -179,8 +179,8 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
 
         $this->response = new HttpClientResponse($info, $body, $error);
 
-        if ($this->response->hasError()){
-            throw new ErrorResponseException(new Response($this->response->getError(), $this->response->getHttpCode(), $this->response->getBody()));
+        if ($this->response->hasError()) {
+            throw new ErrorResponseException(new Response($this->response->getError(), $this->response->getHttpCode(), $this->response->getInfo()));
         }
 
         return $this;
