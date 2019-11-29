@@ -138,6 +138,7 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
         if ($this->method == 'POST') {
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($this->params));
+            $this->headers = is_null($this->headers) ? [] : $this->headers;
             array_push($this->headers, 'Content-Type: application/json');
         } else {
             $this->method = 'GET';
