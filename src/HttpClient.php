@@ -2,10 +2,8 @@
 
 namespace Juuin\HttpClient;
 
-use Illuminate\Http\Response;
 use Juuin\HttpClient\Exceptions\UrlNotSetException;
 use Juuin\HttpClient\Exceptions\WrongMethodException;
-use Juuin\HttpClient\Exceptions\ErrorResponseException;
 use Juuin\HttpClient\Contracts\Request as BaseRequest;
 use Juuin\HttpClient\Contracts\Response as BaseResponse;
 use Juuin\HttpClient\Contracts\Configurable as BaseConfigurable;
@@ -178,10 +176,6 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
         curl_close($curl);
 
         $this->response = new HttpClientResponse($info, $body, $error);
-
-        if ($this->response->hasError()) {
-            throw new ErrorResponseException(new Response($this->response->getError(), $this->response->getHttpCode(), $this->response->getInfo()));
-        }
 
         return $this;
     }
