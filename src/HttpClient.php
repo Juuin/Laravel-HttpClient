@@ -170,7 +170,6 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
         }
 
         curl_setopt($curl, CURLOPT_URL, $this->url);
-//        curl_setopt($curl, CURLOPT_FAILONERROR, true);
 
         $body = curl_exec($curl);
         $info = curl_getinfo($curl);
