@@ -2,7 +2,6 @@
 
 namespace Juuin\HttpClient;
 
-use Illuminate\Support\Arr;
 use Juuin\HttpClient\Exceptions\UrlNotSetException;
 use Juuin\HttpClient\Exceptions\WrongMethodException;
 use Juuin\HttpClient\Contracts\Request as BaseRequest;
