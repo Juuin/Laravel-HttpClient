@@ -16,6 +16,8 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
 
     private $sslKey, $sslCert, $basicAuth;
 
+    private $timeout = 0;
+
     /** @var $response HttpClientResponse */
     private $response;
 
@@ -124,6 +126,16 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
     }
 
     /**
+     * @inheritDoc
+     */
+    public function setTimeout($timeMs = 0)
+    {
+        $this->timeout = $timeMs;
+
+        return $this;
+    }
+
+    /**
      * Set the configs of the request and send
      *
      * @return HttpClient
@@ -169,6 +181,8 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
         }
 
         curl_setopt($curl, CURLOPT_URL, $this->url);
+
+        curl_setopt($curl, CURLOPT_TIMEOUT_MS, $this->timeout);
 
         $body = curl_exec($curl);
         $info = curl_getinfo($curl);

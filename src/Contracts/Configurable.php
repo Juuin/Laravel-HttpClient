@@ -60,4 +60,10 @@ interface Configurable
      * @return HttpClient
      */
     public function setBasicAuth($username, $password);
+
+    /**
+     * @param int $timeMs
+     * @return HttpClient
+     */
+    public function setTimeout($timeMs = 0);
 }
