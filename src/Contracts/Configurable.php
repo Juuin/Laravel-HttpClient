@@ -55,6 +55,14 @@ interface Configurable
     public function setSslCert($path);
 
     /**
+     * Set the ssl cert password
+     *
+     * @param string $password
+     * @return HttpClient
+     */
+    public function setSslCertPassword($password);
+
+    /**
      * @param $username
      * @param $password
      * @return HttpClient

@@ -14,7 +14,7 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
 
     private $url, $method, $headers, $params;
 
-    private $sslKey, $sslCert, $basicAuth;
+    private $sslKey, $sslCert, $sslCertPassword, $basicAuth;
 
     private $timeout = 0;
 
@@ -114,6 +114,19 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
     }
 
     /**
+     * Set the ssl cert password
+     *
+     * @param string $password
+     * @return HttpClient
+     */
+    public function setSslCertPassword($password)
+    {
+        $this->sslCertPassword = $password;
+
+        return $this;
+    }
+
+    /**
      * @param $username
      * @param $password
      * @return HttpClient
@@ -173,6 +186,10 @@ class HttpClient implements BaseConfigurable, BaseRequest, BaseResponse
 
         if (!is_null($this->sslCert)) {
             curl_setopt($curl, CURLOPT_SSLCERT, $this->sslCert);
+        }
+
+        if (!is_null($this->sslCertPassword)) {
+            curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->sslCertPassword);
         }
 
         if (!is_null($this->basicAuth)) {
