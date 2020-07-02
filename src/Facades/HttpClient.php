@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Juuin\HttpClient\HttpClient setParams(array $params);
  * @method static \Juuin\HttpClient\HttpClient setSslKey($path);
  * @method static \Juuin\HttpClient\HttpClient setSslCert($path);
+ * @method static \Juuin\HttpClient\HttpClient setSslCertPassword($password);
  * @method static \Juuin\HttpClient\HttpClient setBasicAuth($username, $password);
  * @method static \Juuin\HttpClient\HttpClient setTimeout($timeMs = 0);
  * @method static \Juuin\HttpClient\HttpClient send();
